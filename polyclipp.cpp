@@ -100,7 +100,7 @@ void suthHodgman() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glLineWidth(10\.0f);
+    glLineWidth(10.0f);
     // Draw clipping window (red)
     if (windowSet) {
         glColor3f(1, 0, 0);
