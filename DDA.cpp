@@ -12,9 +12,10 @@ bool showLine = false;
 bool showDottedLine = false;
 bool showDashedLine = false;
 bool showBoat = false;
+bool showSquareWave = false;
+bool showTriangularWave = false;
 
 void myInit(void) {
-   
     glPointSize(2.0);
     gluOrtho2D(-wl, wl, -wh, wh);
 }
@@ -24,16 +25,13 @@ void ddaAlgorithm(int x1, int y1, int x2, int y2, int LineType) {
     int dx = x2 - x1;
     int dy = y2 - y1;
 
-    // to find out the length
-    if (abs(dx) > abs(dy)) {
+    if (abs(dx) > abs(dy))
         l = abs(dx);
-    } else {
+    else
         l = abs(dy);
-    }
 
     float DX = dx / float(l);
     float DY = dy / float(l);
-
     float x = x1;
     float y = y1;
 
@@ -43,45 +41,73 @@ void ddaAlgorithm(int x1, int y1, int x2, int y2, int LineType) {
 
         if (LineType == 1) {
             glVertex2i(round(x), round(y));
+        } else if (LineType == 2) {
+            if (i % 20 == 0) glVertex2i(round(x), round(y));
+        } else if (LineType == 3) {
+            if (i % 40 < 20) glVertex2i(round(x), round(y));
         }
-        else if (LineType == 2) {
-            if (i % 20 == 0) {
-                glVertex2i(round(x), round(y));
-            }
-        }
-        else if (LineType == 3) {
-            if (i % 40 < 20) {
-                glVertex2i(round(x), round(y));
-            }
-        }
+
         x = x + DX;
         y = y + DY;
     }
-
     glEnd();
     glFlush();
 }
 
-// Function to draw the boat
 void drawBoat() {
-   
-    ddaAlgorithm(300, -350, 750, -350, 1); // horizontal big 2
-    ddaAlgorithm(400, -500, 650, -500, 1); // horizontal short
-   
- 
-   
-    ddaAlgorithm(400, -500, 300, -350, 1); // left connecting sides
-    ddaAlgorithm(650, -500, 750, -350, 1); // right connecting sides
-
- 
-    ddaAlgorithm(525, -50, 525, -350, 1); // right part of the stick
-     // Flag
- 
-    ddaAlgorithm(525, -275, 625, -275, 1); // bottom to top line
-    ddaAlgorithm(525, -50, 625, -275, 1); // top to bottom line
+    ddaAlgorithm(300, -350, 750, -350, 1);
+    ddaAlgorithm(400, -500, 650, -500, 1);
+    ddaAlgorithm(400, -500, 300, -350, 1);
+    ddaAlgorithm(650, -500, 750, -350, 1);
+    ddaAlgorithm(525, -50, 525, -350, 1);
+    ddaAlgorithm(525, -275, 625, -275, 1);
+    ddaAlgorithm(525, -50, 625, -275, 1);
 }
 
-// Function to display the content
+// Draw square wave
+void drawSquareWave() {
+    int startX = -600;
+    int startY = 400;
+    int amplitude = 100;
+    int wavelength = 100;
+    int cycles = 8;
+
+    for (int i = 0; i < cycles; i++) {
+        int x1 = startX + i * wavelength;
+        int x2 = x1 + wavelength / 2;
+        int x3 = x1 + wavelength;
+
+        // Rising edge
+        ddaAlgorithm(x1, startY, x1, startY + amplitude, 1);
+        // Top horizontal
+        ddaAlgorithm(x1, startY + amplitude, x2, startY + amplitude, 1);
+        // Falling edge
+        ddaAlgorithm(x2, startY + amplitude, x2, startY, 1);
+        // Bottom horizontal
+        ddaAlgorithm(x2, startY, x3, startY, 1);
+    }
+}
+
+// Draw triangular wave
+void drawTriangularWave() {
+    int startX = -600;
+    int startY = 200;
+    int amplitude = 100;
+    int wavelength = 100;
+    int cycles = 8;
+
+    for (int i = 0; i < cycles; i++) {
+        int x1 = startX + i * wavelength;
+        int x2 = x1 + wavelength / 2;
+        int x3 = x1 + wavelength;
+
+        // Up slope
+        ddaAlgorithm(x1, startY, x2, startY + amplitude, 1);
+        // Down slope
+        ddaAlgorithm(x2, startY + amplitude, x3, startY, 1);
+    }
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -89,54 +115,38 @@ void display() {
     ddaAlgorithm(-wl, 0, wl, 0, 1);
     ddaAlgorithm(0, -wh, 0, wh, 1);
 
-    // Conditionally draw the elements based on menu flags
-    if (showLine) {
-        ddaAlgorithm(50, 50, 500, 450, 1); // simple line
-    }
-    if (showDottedLine) {
-        ddaAlgorithm(-50,50,-500,450, 2); // dotted line
-    }
-    if (showDashedLine) {
-        ddaAlgorithm(-50,-50,-500,-450, 3); // center line
-    }
-    if (showBoat) {
-        drawBoat(); // draw boat by default or when selected
-    }
+    if (showLine) ddaAlgorithm(50, 50, 500, 450, 1);
+    if (showDottedLine) ddaAlgorithm(-50, 50, -500, 450, 2);
+    if (showDashedLine) ddaAlgorithm(-50, -50, -500, -450, 3);
+    if (showBoat) drawBoat();
+    if (showSquareWave) drawSquareWave();
+    if (showTriangularWave) drawTriangularWave();
 }
 
-// Menu handling functions
 void menu(int option) {
     switch (option) {
-        case 1:
-            showLine = !showLine; // simple line
-            break;
-        case 2:
-            showDottedLine = !showDottedLine; //  dotted line
-            break;
-        case 3:
-            showDashedLine = !showDashedLine; //  center line
-            break;
-        case 4:
-            showBoat = !showBoat; //  boat drawing
-            break;
-        case 5:
-            exit(0); // Exit the program
-            break;
-        default:
-            break;
+        case 1: showLine = !showLine; break;
+        case 2: showDottedLine = !showDottedLine; break;
+        case 3: showDashedLine = !showDashedLine; break;
+        case 4: showBoat = !showBoat; break;
+        case 5: showSquareWave = !showSquareWave; break;
+        case 6: showTriangularWave = !showTriangularWave; break;
+        case 7: exit(0); break;
+        default: break;
     }
-    glutPostRedisplay(); // Redraw the window after menu option
+    glutPostRedisplay();
 }
 
-// Create menu for drawing options
 void createMenu() {
     int menu_id = glutCreateMenu(menu);
-    glutAddMenuEntry(" Simple Line", 1);
-    glutAddMenuEntry(" Dotted Line", 2);
-    glutAddMenuEntry(" Dashed Line", 3);
-    glutAddMenuEntry(" Boat", 4);
-    glutAddMenuEntry("Exit", 5);
-    glutAttachMenu(GLUT_LEFT_BUTTON); // Attach to left-click button
+    glutAddMenuEntry("Simple Line", 1);
+    glutAddMenuEntry("Dotted Line", 2);
+    glutAddMenuEntry("Dashed Line", 3);
+    glutAddMenuEntry("Boat", 4);
+    glutAddMenuEntry("Square Wave", 5);
+    glutAddMenuEntry("Triangular Wave", 6);
+    glutAddMenuEntry("Exit", 7);
+    glutAttachMenu(GLUT_LEFT_BUTTON);
 }
 
 int main(int c, char **v) {
@@ -144,13 +154,13 @@ int main(int c, char **v) {
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(wl, wh);
     glutInitWindowPosition(100, 50);
-    glutCreateWindow("DDA:LINE DRAWING ALGORITHM");
-    glClearColor(1.0, 1.0, 1.0, 1.0); // White background
-    glColor3f(0.0, 0.0, 0.0);  // Black color for the line
+    glutCreateWindow("DDA: LINE DRAWING ALGORITHM");
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glColor3f(0.0, 0.0, 0.0);
 
     glutDisplayFunc(display);
     myInit();
-    createMenu(); // Create menu
+    createMenu();
 
     glutMainLoop();
     return 0;
